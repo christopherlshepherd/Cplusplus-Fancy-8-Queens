@@ -1,0 +1,153 @@
+.#include<iostream>
+using namespace std;
+
+
+bool isok(int q[], int c);
+void backtrack(int &c);
+
+int main()
+{
+ int i,j,k,l;
+ typedef char box[5][7];
+ box bb,wb,*board[8][8], bq, wq;
+ //fill in bb=black box and wb=whitebox
+ for(i=0;i<5;i++)
+ {  for( j=0;j<7;j++)
+    {   wb[i][j]=' ';
+        bb[i][j]=char(35);
+    }
+ }
+ 
+ for (i=0;i<5;i++)
+ {  for (j=0;j<7;j++)
+    {   wq[i][j]=char(35);
+        bq[i][j]=' ';
+        if (i==1)
+        {   if (j==1 || j==3 || j==5)
+            {   wq[i][j]=' ';
+                bq[i][j]='Q';
+            }
+        }
+        if (i==2 || i==3)
+        {   if (j==1 || j==2 || j==3 || j==4 || j==5)
+            {   wq[i][j]=' ';
+                bq[i][j]='Q';
+            }
+        }
+    }
+ }
+ 
+ //fill board with pointers to bb and wb in alternate positions
+ for(i=0;i<8;i++)
+ {  for(j=0;j<8;j++)
+    {   if((i+j)%2==0)
+            board[i][j]=&wb;
+        else
+           board[i][j]=&bb;
+    }
+ }
+ 
+ int q[8], c=1, counter=0, start=0;
+
+ q[0]=0;
+
+ while(true) //endless loop to find solutions, the program will end elsewhere
+ {  while(c<8) //loops until c==8. When c==8, a solution was found and the program will move on from this loop to start printing out the board
+    {   if(start==0) //start at the top of the row. Using -1 so we can check 0 as well
+        {   q[c]=-1;
+        }
+
+        start=1; //at this point, we only want to make start=0 if we are starting a new row
+
+        while(q[c]<8) //cycling through the "rows" until q[c]==8
+        {   q[c]++;
+            if(q[c]==8) //if we increase q[c] and it hits 8, backtrack to the previous column to find another solution (without resetting to -1)
+            {   start=1; //must do this before 'break' to prevent q[c] from resetting to -1 so we can check for other values
+                backtrack(c); //this function moves to the previous column
+                break;
+            }
+
+            if ( isok(q,c) ) //if q[c]<8 from the previous 'IF' statement, then this is the test to see if we can leave a queen here
+            {   c++; //q[c] passed the test, so we can move to the next column and start looking for a valid queen position
+                start=0; //if the next column had been backtracked from before, we want to reset it to -1 all over again
+                break; //must break or we will keep cycling thru the q[c]<8 loop forever. Instead want to check if at the end of a solution so we can print
+            }
+        }
+    }
+    if (c==8) //c must be 8 in order to get to this point. this if statement confirms that
+    {
+        
+        for (i=0;i<8;i++)
+        {   for (j=0;j<8;j++)
+            {   
+                  if (q[j]==i)
+                  {   if (board[i][j]== &wb)
+                          board[i][j]= &bq;
+                      if (board[i][j]== &bb)
+                          board[i][j]= &wq;
+                  }
+                
+            }
+        }
+        
+        // print the board via the pointers in array board
+        // first print upper border
+        cout<<"  ";
+        for(i=0;i<7*8;i++)
+            cout<<'_';
+        cout<<endl;
+ 
+        // now print the board
+        for(i=0;i<8;i++)
+        {  for(k=0;k<5;k++)
+            {   cout<<" "<<char(124); //print left border
+                for(j=0;j<8;j++)
+                    for(l=0;l<7;l++)
+                    {   cout<<(*board[i][j])[k][l];
+                    }
+                    cout<<char(124)<<endl; // at end of line print bar and then newline
+            }
+        }
+ 
+        //before exiting print lower border
+        cout<<"  ";
+        for(i=0;i<7*8;i++)
+        {  cout<<"‾";
+        }
+        cout<<endl;
+        counter++;
+        cout << endl << "Solution # " << counter << ": {";
+        for (int i=0; i<8;i++)
+        {
+          cout << q[i] << ",";
+        }
+        cout << "}"<< endl<<endl<<endl;
+        backtrack(c); //want to check for more solutions, so we will go back one column to search for more solutions
+        start=1; //this keeps q[c] from resetting to -1 and we can check further values PASSED the current valid position
+        for(i=0;i<8;i++)
+        {  for(j=0;j<8;j++)
+          {   if((i+j)%2==0)
+                board[i][j]=&wb;
+              else
+                board[i][j]=&bb;
+          }
+        }
+    }
+ }
+ 
+ return 0;
+}
+
+bool isok(int q[], int c)
+{   for(int i=0; i<c; i++)
+    {   if(q[c]==q[i] || (c-i) == abs(q[c]-q[i]) )
+            return false;
+    }
+    return true;
+}
+
+
+void backtrack(int &c)
+{ c--;
+  if (c==-1) exit(1);    
+}
